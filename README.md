@@ -2,10 +2,14 @@
 
 > A brief, visually stunning, one-page slide application demonstrating encryption, decryption, and Caesar Cipher cryptographic system architecture.
 
+### 🚀 Live Website
+👉 **[https://sage-nasturtium-47916c.netlify.app/#encrypt](https://sage-nasturtium-47916c.netlify.app/#encrypt)**
+
 ---
 
 ## 📋 Table of Contents
 
+- [🚀 Live Website](#-live-website)
 - [Overview](#-overview)
 - [Slide-Based Structure](#-slide-based-structure)
 - [Slide Breakdown](#-slide-breakdown)
@@ -93,6 +97,11 @@ The Caesar Cipher replaces each alphabet character with another character shifte
 
 ## ▶️ How to Run
 
+### Option 1: Live Deployment (Instant)
+Access the application directly in your browser without local setup:
+👉 **[https://sage-nasturtium-47916c.netlify.app/#encrypt](https://sage-nasturtium-47916c.netlify.app/#encrypt)**
+
+### Option 2: Run Locally
 1. Open a terminal in the project directory:
    ```bash
    npx serve . -l 3000
