@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CryptoVault — Caesar Cipher Slide Lab</title>
+  <meta name="description" content="One-page slide-based interactive Caesar Cipher lab for encryption, decryption, and system architecture." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <canvas id="particleCanvas"></canvas>
+
+  <!-- APP SHELL -->
+  <div class="app-wrapper">
+
+    <!-- HEADER NAVIGATION -->
+    <header class="app-header">
+      <div class="header-inner">
+        <div class="logo">
+          <span class="logo-icon">
+            <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="8" y="18" width="24" height="18" rx="4" fill="url(#lg1)" />
+              <path d="M13 18v-6a7 7 0 0 1 14 0v6" stroke="url(#lg2)" stroke-width="2.5" stroke-linecap="round"/>
+              <circle cx="20" cy="27" r="3" fill="#fff" fill-opacity="0.9"/>
+              <line x1="20" y1="30" x2="20" y2="33" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+              <defs>
+                <linearGradient id="lg1" x1="8" y1="18" x2="32" y2="36" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#818CF8"/><stop offset="1" stop-color="#6366F1"/>
+                </linearGradient>
+                <linearGradient id="lg2" x1="13" y1="12" x2="27" y2="18" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#A5B4FC"/><stop offset="1" stop-color="#818CF8"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </span>
+          <span class="logo-text">Crypto<span class="accent">Vault</span></span>
+        </div>
+
+        <!-- SLIDE TABS -->
+        <nav class="slide-nav-tabs">
+          <button class="nav-tab active" onclick="goToSlide(0)" id="tab-0">
+            <span>🔒</span><span>1. Encrypt</span>
+          </button>
+          <button class="nav-tab" onclick="goToSlide(1)" id="tab-1">
+            <span>🔓</span><span>2. Decrypt</span>
+          </button>
+          <button class="nav-tab" onclick="goToSlide(2)" id="tab-2">
+            <span>💡</span><span>3. How It Works</span>
+          </button>
+        </nav>
+
+        <!-- PAGINATION CONTROLS -->
+        <div class="slide-controls">
+          <button class="ctrl-btn" onclick="prevSlide()" id="prev-btn" title="Previous Slide">←</button>
+          <span class="slide-counter" id="slide-counter">Slide 1 / 3</span>
+          <button class="ctrl-btn" onclick="nextSlide()" id="next-btn" title="Next Slide">→</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- SLIDES CONTAINER (One-Page Slider) -->
+    <main class="slider-viewport">
+      <div class="slides-track" id="slidesTrack">
+
+        <!-- ═══════════════════════════════════════════════════
+             SLIDE 1: ENCRYPT (Plain Text → Cipher Text)
+        ═══════════════════════════════════════════════════ -->
+        <section class="slide-panel" id="slide-encrypt">
+          <div class="slide-content">
+            
+            <div class="slide-intro">
+              <span class="slide-badge badge-encrypt">🔒 Step 1: Encryption</span>
+              <h1 class="slide-title">Plain Text <span class="arrow-sep">→</span> <span class="gradient-text">Cipher Text</span></h1>
+              <p class="slide-desc">Type your message and set a shift key. Each letter shifts forward down the alphabet.</p>
+            </div>
+
+            <!-- WORKSPACE -->
+            <div class="workspace-grid">
+              
+              <!-- Plaintext Box -->
+              <div class="card-box">
+                <div class="card-header">
+                  <span class="tag-pill tag-green">INPUT</span>
+                  <span class="card-heading">Plain Text</span>
+                </div>
+                <textarea id="pt-input" placeholder="Type confidential plaintext here…" spellcheck="false" oninput="handleEncryptInput()"></textarea>
+                <div class="card-footer">
+                  <span class="char-count" id="pt-count">0 chars</span>
+                  <button class="action-btn-sm" onclick="clearEncrypt()">🗑️ Clear</button>
+                </div>
+              </div>
+
+              <!-- Center Controls -->
+              <div class="center-dial">
+                <div class="dial-label">Shift Key (K)</div>
+                <div class="stepper-box">
+                  <button class="step-btn" onclick="changeShift(-1)">−</button>
+                  <input type="number" id="shift-input" value="3" min="1" max="25" oninput="onShiftInputChange()" />
+                  <button class="step-btn" onclick="changeShift(1)">+</button>
+                </div>
+                <div class="mini-wheel-preview" id="encrypt-wheel-preview"></div>
+                <button class="btn-execute btn-encrypt" onclick="runEncryptAndSlide()">
+                  <span>🔒 Encrypt &amp; Slide →</span>
+                </button>
+              </div>
+
+              <!-- Ciphertext Box -->
+              <div class="card-box">
+                <div class="card-header">
+                  <span class="tag-pill tag-purple">OUTPUT</span>
+                  <span class="card-heading">Cipher Text</span>
+                </div>
+                <textarea id="ct-output" placeholder="Encrypted ciphertext will appear here…" spellcheck="false" readonly></textarea>
+                <div class="card-footer">
+                  <button class="action-btn-sm" onclick="copyText('ct-output', 'Ciphertext')">📋 Copy</button>
+                  <button class="action-btn-highlight" onclick="goToSlide(1)">
+                    Go to Decrypt ➔
+                  </button>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- COMPACT STEP VISUALIZER -->
+            <div class="visualizer-strip">
+              <div class="vis-header">
+                <span class="vis-dot"></span>
+                <span>Transformation Breakdown: <code>C = (P + K) mod 26</code></span>
+              </div>
+              <div class="vis-grid" id="encrypt-vis-grid">
+                <p class="vis-empty">Type letters above to see live character-by-character transformation.</p>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+
+        <!-- ═══════════════════════════════════════════════════
+             SLIDE 2: DECRYPT (Cipher Text → Plain Text)
+        ═══════════════════════════════════════════════════ -->
+        <section class="slide-panel" id="slide-decrypt">
+          <div class="slide-content">
+            
+            <div class="slide-intro">
+              <span class="slide-badge badge-decrypt">🔓 Step 2: Decryption</span>
+              <h1 class="slide-title">Cipher Text <span class="arrow-sep">→</span> <span class="gradient-text-green">Plain Text</span></h1>
+              <p class="slide-desc">Ciphertext automatically imports here. Reverse the shift key to recover the secret message.</p>
+            </div>
+
+            <!-- WORKSPACE -->
+            <div class="workspace-grid">
+              
+              <!-- Ciphertext Box -->
+              <div class="card-box">
+                <div class="card-header">
+                  <span class="tag-pill tag-purple">INPUT</span>
+                  <span class="card-heading">Cipher Text</span>
+                </div>
+                <textarea id="ct-input" placeholder="Paste or edit ciphertext here…" spellcheck="false" oninput="handleDecryptInput()"></textarea>
+                <div class="card-footer">
+                  <span class="char-count" id="ct-count">0 chars</span>
+                  <div class="btn-group-sm">
+                    <button class="action-btn-sm" onclick="syncFromEncrypt()">📥 Sync from Encrypt</button>
+                    <button class="action-btn-sm" onclick="clearDecrypt()">🗑️ Clear</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Center Controls -->
+              <div class="center-dial">
+                <div class="dial-label">Reverse Key (−K)</div>
+                <div class="stepper-box">
+                  <button class="step-btn" onclick="changeDecryptShift(-1)">−</button>
+                  <input type="number" id="decrypt-shift-input" value="3" min="1" max="25" oninput="onDecryptShiftInputChange()" />
+                  <button class="step-btn" onclick="changeDecryptShift(1)">+</button>
+                </div>
+                <div class="mini-wheel-preview" id="decrypt-wheel-preview"></div>
+                <button class="btn-execute btn-decrypt" onclick="runDecrypt()">
+                  <span>🔓 Decrypt Now</span>
+                </button>
+              </div>
+
+              <!-- Recovered Plaintext Box -->
+              <div class="card-box">
+                <div class="card-header">
+                  <span class="tag-pill tag-green">OUTPUT</span>
+                  <span class="card-heading">Recovered Plain Text</span>
+                </div>
+                <textarea id="pt-output" placeholder="Decrypted original message will appear here…" spellcheck="false" readonly></textarea>
+                <div class="card-footer">
+                  <button class="action-btn-sm" onclick="copyText('pt-output', 'Plain text')">📋 Copy</button>
+                  <button class="action-btn-highlight green-highlight" onclick="goToSlide(2)">
+                    How It Works ➔
+                  </button>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- COMPACT STEP VISUALIZER -->
+            <div class="visualizer-strip">
+              <div class="vis-header">
+                <span class="vis-dot green-dot"></span>
+                <span>Reverse Breakdown: <code>P = (C − K + 26) mod 26</code></span>
+              </div>
+              <div class="vis-grid" id="decrypt-vis-grid">
+                <p class="vis-empty">Decryption character decoding cards will appear here.</p>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+
+        <!-- ═══════════════════════════════════════════════════
+             SLIDE 3: HOW THE SYSTEM WORKS (Brief & Educational)
+        ═══════════════════════════════════════════════════ -->
+        <section class="slide-panel" id="slide-how">
+          <div class="slide-content">
+            
+            <div class="slide-intro">
+              <span class="slide-badge badge-how">💡 System Architecture</span>
+              <h1 class="slide-title">How The System Works</h1>
+              <p class="slide-desc">A brief, visual breakdown of the Caesar Cipher algorithm, modular arithmetic, and cryptographic principles.</p>
+            </div>
+
+            <!-- 4 BRIEF EDUCATIONAL CARDS -->
+            <div class="how-cards-grid">
+              
+              <!-- CARD 1: Full Pipeline -->
+              <div class="info-card">
+                <div class="info-card-badge">01 • Lifecycle</div>
+                <h3>The Complete Pipeline</h3>
+                <p class="info-card-text">Data flows sequentially from confidential plaintext, through mathematical shift encryption, to ciphertext, and is restored by the inverse key.</p>
+                <div class="pipeline-flow-diagram">
+                  <div class="flow-node">
+                    <span class="node-icon">📄</span>
+                    <span class="node-name">Plain Text</span>
+                    <span class="node-sub">"HELLO"</span>
+                  </div>
+                  <div class="flow-arrow">➔ <span class="flow-sub">+3</span></div>
+                  <div class="flow-node highlight-node">
+                    <span class="node-icon">🔒</span>
+                    <span class="node-name">Cipher Text</span>
+                    <span class="node-sub">"KHOOR"</span>
+                  </div>
+                  <div class="flow-arrow">➔ <span class="flow-sub">−3</span></div>
+                  <div class="flow-node">
+                    <span class="node-icon">✅</span>
+                    <span class="node-name">Recovered</span>
+                    <span class="node-sub">"HELLO"</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- CARD 2: Mathematics -->
+              <div class="info-card">
+                <div class="info-card-badge">02 • Mathematics</div>
+                <h3>Modular Arithmetic</h3>
+                <p class="info-card-text">Each letter is mapped to an index from 0 to 25 ($A=0, B=1, \dots, Z=25$). The transformation wraps around using modulo 26.</p>
+                <div class="math-box">
+                  <div class="formula-row">
+                    <span class="formula-label">Encryption:</span>
+                    <code>C = (P + K) mod 26</code>
+                  </div>
+                  <div class="formula-row">
+                    <span class="formula-label">Decryption:</span>
+                    <code>P = (C − K + 26) mod 26</code>
+                  </div>
+                </div>
+                <p class="info-note">Non-alphabetic characters (spaces, numbers, punctuation) pass through unmodified.</p>
+              </div>
+
+              <!-- CARD 3: Interactive Alphabet Shift -->
+              <div class="info-card">
+                <div class="info-card-badge">03 • Interactive</div>
+                <h3>Alphabet Shift Explorer</h3>
+                <p class="info-card-text">Slide to adjust Key $K$ and watch how the alphabet maps in real time:</p>
+                <div class="interactive-slider-box">
+                  <div class="slider-row">
+                    <span>Shift $K = $ <strong id="how-shift-val">3</strong></span>
+                    <input type="range" id="how-shift-slider" min="1" max="25" value="3" oninput="updateHowAlphabet(this.value)" />
+                  </div>
+                  <div class="alphabet-display" id="alphabet-display"></div>
+                </div>
+              </div>
+
+              <!-- CARD 4: Security Concept -->
+              <div class="info-card">
+                <div class="info-card-badge">04 • Cybersecurity</div>
+                <h3>Cryptographic Analysis</h3>
+                <p class="info-card-text">Why Caesar Cipher is historically foundational yet practically vulnerable:</p>
+                <ul class="concept-list">
+                  <li><strong>Symmetric Encryption:</strong> The sender and receiver must both know and use the identical key $K$.</li>
+                  <li><strong>Small Key Space:</strong> Only 25 possible shifts. A modern computer tests all keys in less than 1 millisecond.</li>
+                  <li><strong>Frequency Analysis:</strong> Common letters (like 'E' and 'T') preserve their statistical frequency, making it easy to crack.</li>
+                </ul>
+              </div>
+
+            </div>
+
+            <!-- BACK TO ENCRYPT BAR -->
+            <div class="how-bottom-bar">
+              <button class="btn-execute btn-encrypt" onclick="goToSlide(0)">
+                <span>🔒 Try Encryption on Slide 1 ➔</span>
+              </button>
+            </div>
+
+          </div>
+        </section>
+
+      </div>
+    </main>
+
+    <!-- SLIDE DOTS INDICATOR -->
+    <div class="slide-dots">
+      <button class="dot active" onclick="goToSlide(0)" title="Slide 1: Encrypt"></button>
+      <button class="dot" onclick="goToSlide(1)" title="Slide 2: Decrypt"></button>
+      <button class="dot" onclick="goToSlide(2)" title="Slide 3: How It Works"></button>
+    </div>
+
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
